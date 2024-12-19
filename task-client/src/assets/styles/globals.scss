@@ -1,0 +1,193 @@
+@use 'sass:color';
+@use 'sass:map';
+@use 'sass:list';
+@use 'sass:math';
+@font-face {
+	font-family: 'fira-sans-bold';
+	src: url('@/assets/fonts/FiraSans-Bold.ttf') format('truetype');
+	font-weight: 700;
+	font-style: normal;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: 'fira-sans-regular';
+	src: url('@/assets/fonts/FiraSans-Regular.ttf') format('truetype');
+	font-weight: 400;
+	font-style: normal;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: 'fira-sans-semibold';
+	src: url('@/assets/fonts/FiraSans-SemiBold.ttf') format('truetype');
+	font-weight: 600;
+	font-style: normal;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: 'fira-sans-italic';
+	src: url('@/assets/fonts/FiraSans-Italic.ttf') format('truetype');
+	font-weight: 600;
+	font-style: normal;
+	font-display: swap;
+}
+
+@import url('https://fonts.googleapis.com/css2?family=Manuale:ital,wght@0,300..800;1,300..800&display=swap');
+
+$container-width: math.div(370, 390) * 100vw;
+$color-deep-violet: #2b003d;
+$color-nymph-hips: #faeedd;
+$color-indigo: #4b0082;
+
+// Системные цвета
+$colors: (
+	'primary': $color-deep-violet,
+	'secondary': $color-nymph-hips,
+	'accent': $color-indigo,
+	'background': #666666,
+	'text': #ffffff,
+	'border': #4a148c,
+);
+
+// Размеры шрифтов
+$font-sizes: (
+	'xs': 0.75rem,
+	// 12px
+	'sm': 0.875rem,
+	// 14px
+	'base': 1rem,
+	// 16px
+	'md': 1.125rem,
+	// 18px
+	'lg': 1.25rem,
+	// 20px
+	'xl': 1.5rem,
+	// 24px
+	'2xl': 1.75rem,
+	// 28px
+	'3xl': 2rem // 32px,
+);
+
+// Жирность шрифта
+$font-weights: (
+	'light': 300,
+	'regular': 400,
+	'medium': 500,
+	'semibold': 600,
+	'bold': 700,
+);
+
+// Семейства шрифтов
+$font-families: (
+	'primary': (
+		'fira-sans-regular',
+		sans-serif,
+	),
+	'secondary': (
+		'Manuale',
+		serif,
+	),
+	'mono': (
+		'Courier New',
+		monospace,
+	),
+);
+
+// Высота строки
+$line-heights: (
+	'tight': 1.2,
+	'normal': 1.5,
+	'relaxed': 1.75,
+);
+
+// Функции и миксины
+@function rgba-color($color, $opacity) {
+	@return color.adjust($color, $alpha: -1 + $opacity);
+}
+
+@function get-color($key) {
+	@return map.get($colors, $key);
+}
+
+@mixin font(
+	$size: 'base',
+	$weight: 'regular',
+	$family: 'primary',
+	$height: 'normal'
+) {
+	font-size: map.get($font-sizes, $size);
+	font-weight: map.get($font-weights, $weight);
+	font-family: list.nth(map.get($font-families, $family), 1);
+	line-height: map.get($line-heights, $height);
+}
+
+// Базовые стили
+body {
+	background-color: rgba-color(get-color('background'), 0.725);
+	background-size: 8px 8px;
+	background-image: repeating-linear-gradient(
+			0deg,
+			#666,
+			#3d3d3d 1px,
+			transparent 1px,
+			transparent 8px
+		),
+		repeating-linear-gradient(
+			-90deg,
+			#666,
+			#666 1px,
+			transparent 1px,
+			transparent 16px
+		);
+	background-repeat: no-repeat;
+	@include font('base', 'regular', 'primary');
+	color: get-color('text');
+}
+
+// Типография
+h1 {
+	@include font('3xl', 'bold', 'primary');
+	color: get-color('primary');
+}
+
+h2 {
+	@include font('2xl', 'bold', 'primary');
+	color: get-color('primary');
+}
+
+h3 {
+	@include font('xl', 'semibold', 'primary');
+	color: get-color('primary');
+}
+
+p {
+	@include font('base', 'regular', 'primary');
+}
+
+// Утилиты
+.section {
+	background-color: #3d3d3d;
+	border: 1px solid #222222;
+	border-radius: 5px;
+}
+
+.border {
+	border: 1px solid get-color('border');
+}
+
+.container {
+	width: $container-width;
+	margin-inline: auto;
+	max-width: 100%;
+	padding-inline: 1rem;
+	box-sizing: border-box;
+}
+
+// Сброс стилей для App.vue
+#app {
+	@include font('base', 'regular', 'primary');
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
