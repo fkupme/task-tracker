@@ -1,32 +1,34 @@
 <template>
-	<article 
-		class="fast-day" 
-		@click="push"
-		:class="{ 
-			'fast-day_active': active, 
-			'fast-day__weekend': isWeekend 
+	<article
+		class="fast-day"
+		@click="push('day', { date: date }, 300)"
+		:class="{
+			'fast-day_active': active,
+			'fast-day_weekend': isWeekend,
 		}"
 	>
 		<div class="fast-day__header">
 			<div class="fast-day__date">{{ dateParse(date) }}</div>
 			<div class="fast-day__weekday">{{ getWeekDay() }}</div>
 		</div>
-		
+
 		<div class="fast-day__content">
 			<div class="fast-day__wrapper" v-if="active">
 				<div
 					v-for="task in day"
 					:key="task.id"
-					class="fast-day__task"
-					:style="{ backgroundColor: getTaskColor(task.id) }" 
+					class="fast-day-task"
+					:style="{ backgroundColor: getTaskColor(task.id) }"
 				>
-					<span class="fast-day__task-time">{{ task.start }}</span>
-					<span class="fast-day__task-name">{{ task.task }}</span>
+					<span class="fast-day-task__time">{{ task.start }}</span>
+					<span class="fast-day-task__name">{{ task.task }}</span>
 				</div>
 			</div>
 			<div class="fast-day__wrapper" v-else>
-				<div class="fast-day__task-length">
-					{{ day.length }} {{ taskWord }}
+				<div class="fast-day-task-length">
+					<span class="fast-day-task-length__text">задач:</span>
+					<br />
+					{{ day.length }}
 				</div>
 			</div>
 		</div>
@@ -34,8 +36,11 @@
 </template>
 
 <script>
+import pushMixin from "@/mixins/pushMixin";
+
 export default {
 	name: "fast-day-component",
+	mixins: [pushMixin],
 	props: {
 		day: {
 			type: Array,
@@ -45,47 +50,31 @@ export default {
 			type: String,
 			required: true,
 		},
-		active: {
+		active:{
 			type: Boolean,
-			required: true, // Флаг активного дня
-		},
+			required: false,
+		}
 	},
 	computed: {
 		isWeekend() {
 			const date = new Date(this.date);
 			return date.getDay() === 0 || date.getDay() === 6; // Проверка на выходной день (суббота или воскресенье)
 		},
-		taskWord() {
-			// Логика для правильного склонения слова "задача" в зависимости от количества
-			const lastDigit = this.day.length % 10;
-			const lastTwoDigits = this.day.length % 100;
-
-			if (lastTwoDigits >= 11 && lastTwoDigits <= 19) return "задач";
-			if (lastDigit === 1) return "задача";
-			if (lastDigit >= 2 && lastDigit <= 4) return "задачи";
-			return "задач";
-		},
 	},
 	methods: {
-		push() {
-			setTimeout(() => {
-				this.$router.push({ name: "day", params: { date: this.date } });
-			}, 300);
-		},
 		dateParse(date) {
-			return date.split("-")[2]; // Извлекаем число из даты (последний элемент после разделения по дефису)
+			return date.split("-")[2];
 		},
 		getWeekDay() {
 			const days = ["ВС", "ПН", "ВТ", "СР", "ЧТ", "ПТ", "СБ"];
 			const date = new Date(this.date);
-			return days[date.getDay()]; // Получаем сокращенное название дня недели
+			return days[date.getDay()];
 		},
 		getTaskColor(taskId) {
-			// Генерация уникального цвета для задачи на основе её ID
-			const hue = 36; // Основной оттенок (оранжевый)
-			const saturation = 50 + ((taskId * 7) % 30); // Изменение насыщенности
-			const lightness = 85 + ((taskId * 5) % 10); // Изменение светлости
-			return `hsl(${hue}, ${saturation}%, ${lightness}%)`; // Возвращаем цвет в формате HSL
+			const hue = 36;
+			const saturation = 50 + ((taskId * 7) % 30);
+			const lightness = 85 + ((taskId * 5) % 10);
+			return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
 		},
 	},
 };
@@ -96,12 +85,14 @@ export default {
 @use "sass:color";
 
 .fast-day {
-	aspect-ratio: 1 / 1;
-	padding: 1vw;
+	aspect-ratio: 3/4;
+	padding: min(1vw, 8px);
 	background-color: $color-nymph-hips;
 	color: $color-deep-violet;
 	border-radius: 8px;
 	transition: 0.3s ease-in-out;
+	max-width: 100%;
+	min-width: 0;
 	&:active {
 		background-color: color.adjust($color-nymph-hips, $lightness: 5%);
 		transform: translateY(-10px);
@@ -111,6 +102,7 @@ export default {
 
 	&_active {
 		background-color: color.adjust($color-nymph-hips, $lightness: 5%);
+		aspect-ratio: unset;
 	}
 
 	&_weekend {
@@ -121,8 +113,7 @@ export default {
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
-		margin-bottom: 0.5rem;
-		flex-shrink: 0;
+		gap: min(0.5vw, 4px);
 	}
 
 	&__date {
@@ -137,10 +128,12 @@ export default {
 	&__wrapper {
 		display: flex;
 		flex-direction: column;
-		row-gap: 2rem;
+		gap: min(0.5vw, 4px);
+		flex: 1;
+		min-height: 0;
 	}
 
-	&__task {
+	&-task {
 		display: flex;
 		align-items: center;
 		gap: 0.5rem;
@@ -148,22 +141,26 @@ export default {
 		border-radius: 4px;
 		@include font("base", "regular", "primary", "normal");
 
-		&-time {
+		&__time {
 			@include font("base", "medium");
 			min-width: 45px;
 		}
 
-		&-name {
+		&__name {
 			white-space: nowrap;
 			overflow: hidden;
 			text-overflow: ellipsis;
 		}
 	}
 
-	&__task-length {
+	&-task-length {
 		@include font("lg", "bold", "primary", "normal");
 		text-align: center;
-		padding: 0.5rem;
+		padding-inline: 0.1vw;
+
+		&__text {
+			@include font("xs", "regular", "primary", "normal");
+		}
 	}
 }
 </style>

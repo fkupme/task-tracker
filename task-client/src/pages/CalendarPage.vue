@@ -18,7 +18,6 @@ export default {
 @use '@/assets/styles/globals.scss' as *;
 .calendar-page{
 	position: relative;
-	min-height: 100dvh;
 	display: flex;
 	align-items: center;
 	justify-content: center;

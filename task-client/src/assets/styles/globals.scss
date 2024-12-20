@@ -67,7 +67,7 @@ $font-sizes: (
 	// 24px
 	'2xl': 1.75rem,
 	// 28px
-	'3xl': 2rem // 32px,
+	'3xl': 2rem // 32px,,
 );
 
 // Жирность шрифта
@@ -182,7 +182,6 @@ p {
 	margin-inline: auto;
 	max-width: 100%;
 	padding-inline: 1rem;
-	box-sizing: border-box;
 }
 
 // Сброс стилей для App.vue

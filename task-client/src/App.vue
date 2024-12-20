@@ -16,5 +16,10 @@ export default {
 
 <style lang="scss">
 @use '@/assets/styles/globals' as *;
+@use '@/assets/styles/transitions' as *;
 
+#app {
+	position: relative;
+	overflow-x: hidden;
+}
 </style>

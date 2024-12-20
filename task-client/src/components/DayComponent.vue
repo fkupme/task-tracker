@@ -160,11 +160,5 @@ export default {
 	column-gap: 1px;
 	justify-content: start;
 	position: relative;
-	box-sizing: border-box;
-
-	&-time {
-		grid-column: 1;
-		z-index: 1;
-	}
 }
 </style>
