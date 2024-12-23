@@ -7,8 +7,8 @@
 				class="week-component-activate-button"
 				@click="push('week', { week: this.week }, 500), (isActive = !isActive)"
 			>
-				<div class="bar1" :class="{ 'bar1_active': isActive }"></div>
-				<div class="bar2" :class="{ 'bar2_active': isActive }"></div>
+				<div class="bar1" :class="{ bar1_active: isActive }"></div>
+				<div class="bar2" :class="{ bar2_active: isActive }"></div>
 			</button>
 		</div>
 		<div class="week">
@@ -19,9 +19,9 @@
 					:date="key"
 					:day="day"
 					:key="key"
-					:style="{ 
-						'transition-delay': isActive ? `${index * 0.040}s` :null,
-						'transform': isActive ? 'translateY(-10px)': null
+					:style="{
+						'transition-delay': isActive ? `${index * 0.04}s` : null,
+						transform: isActive ? 'translateY(-10px)' : null,
 					}"
 				/>
 			</div>
@@ -37,7 +37,7 @@ export default {
 	data() {
 		return {
 			isActive: false,
-			week: 1
+			week: 1,
 		};
 	},
 	name: "week-component",

@@ -50,10 +50,10 @@ export default {
 			type: String,
 			required: true,
 		},
-		active:{
+		active: {
 			type: Boolean,
 			required: false,
-		}
+		},
 	},
 	computed: {
 		isWeekend() {

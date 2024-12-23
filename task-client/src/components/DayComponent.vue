@@ -1,22 +1,24 @@
 <template>
-	<article class="day" v-if="show">
-		<div
-			:style="{ 'grid-row': i }"
-			class="day-time"
-			v-for="i in length"
-			:key="i"
-		>
-			{{ i + 7 }}:00
+	<article class="day-wrapper">
+		<h3 class="day-title">{{ formatDate(date) }}</h3>
+		<div class="day">
+			<div
+				:style="{ 'grid-row': i }"
+				class="day-time"
+				v-for="i in length"
+				:key="i"
+			>
+				{{ i + 7 }}:00
+			</div>
+			<task-component
+				v-for="task in tasks"
+				:task="task"
+				:key="task.id"
+				:style="defineStyle(task)"
+				@click.stop="handleTaskClick(task)"
+			/>
 		</div>
-		<task-component
-			v-for="task in tasks"
-			:task="task"
-			:key="task.id"
-			:style="defineStyle(task)"
-			@click.stop="handleTaskClick(task)"
-		/>
 	</article>
-	<article class="day" v-else></article>
 </template>
 
 <script>
@@ -27,7 +29,6 @@ export default {
 	data() {
 		return {
 			length: 15,
-			show: true,
 			taskColumns: new Map(),
 			maxZIndex: 2,
 			taskZIndexes: new Map(),
@@ -56,8 +57,19 @@ export default {
 			type: Array,
 			required: true,
 		},
+		date: {
+			type: String,
+			required: true,
+		},
 	},
 	methods: {
+		formatDate(stringDate) {
+			const dateObj = new Date(stringDate);
+			const days = ['Воскресенье', 'Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота'];
+			const months = ['января', 'февраля', 'марта', 'апреля', 'мая', 'июня', 'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря'];
+			return `${days[dateObj.getDay()]}, ${dateObj.getDate()} ${months[dateObj.getMonth()]}`;
+		},
+		
 		timeToMinutes(time) {
 			const [hours, minutes] = time.split(":").map(Number);
 			return hours * 60 + minutes;
@@ -113,20 +125,20 @@ export default {
 
 		getTaskBackground(taskId) {
 			const hue = 36;
-			const saturation = 50 + (taskId * 7) % 30;
-			const lightness = 85 + (taskId * 5) % 10;
-			
+			const saturation = 50 + ((taskId * 7) % 30);
+			const lightness = 85 + ((taskId * 5) % 10);
+
 			return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
 		},
 
 		defineStyle(task) {
-			const [startHour, startMinute] = task.start.split(':').map(Number);
-			const [endHour, endMinute] = task.end.split(':').map(Number);
+			const [startHour, startMinute] = task.start.split(":").map(Number);
+			const [endHour, endMinute] = task.end.split(":").map(Number);
 
 			const startMinutes = startHour * 60 + startMinute;
 			const endMinutes = endHour * 60 + endMinute;
 			const rowSpanMinutes = endMinutes - startMinutes;
-			
+
 			const startRow = startHour - 7;
 			const topOffset = (startMinute * 100) / 60;
 
@@ -134,11 +146,14 @@ export default {
 			const backgroundColor = this.getTaskBackground(task.id);
 
 			return {
-				'grid-row': startRow >= 0 ? `${startRow} / span ${Math.ceil(rowSpanMinutes / 60)}` : '0 / span 1',
-				'grid-column': column || 2,
-				position: 'relative',
+				"grid-row":
+					startRow >= 0
+						? `${startRow} / span ${Math.ceil(rowSpanMinutes / 60)}`
+						: "0 / span 1",
+				"grid-column": column || 2,
+				position: "relative",
 				top: `${topOffset}%`,
-				width: 'calc(100% - 10px)',
+				width: "calc(100% - 10px)",
 				backgroundColor,
 				zIndex: this.taskZIndexes.get(task.id) || 2,
 			};
@@ -153,6 +168,8 @@ export default {
 </script>
 
 <style lang='scss' scoped>
+@use '@/assets/styles/globals' as *;
+
 .day {
 	display: grid;
 	grid-template-columns: 60px repeat(5, minmax(120px, 1fr));
@@ -160,5 +177,11 @@ export default {
 	column-gap: 1px;
 	justify-content: start;
 	position: relative;
+	&-title {
+		grid-row: 1;
+		grid-column: 1 / span 2;
+		@include font('xl', 'bold', 'primary', 'normal');
+		text-shadow: 0 0 10px get-color('border');
+	}
 }
 </style>

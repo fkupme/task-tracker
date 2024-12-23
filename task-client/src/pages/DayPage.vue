@@ -1,6 +1,8 @@
 <template>
-	<div class="day-page">
-		<day-component :tasks="day[$route.params.date]" :data="data"/>
+	<div class="container">
+		<div class="day-page">
+			<day-component :tasks="day[$route.params.date]" :date="$route.params.date"/>
+		</div>
 	</div>
 </template>
 

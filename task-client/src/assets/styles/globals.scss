@@ -67,7 +67,7 @@ $font-sizes: (
 	// 24px
 	'2xl': 1.75rem,
 	// 28px
-	'3xl': 2rem // 32px,,
+	'3xl': 2rem // 32px,,,,
 );
 
 // Жирность шрифта
@@ -125,23 +125,10 @@ $line-heights: (
 
 // Базовые стили
 body {
-	background-color: rgba-color(get-color('background'), 0.725);
-	background-size: 8px 8px;
-	background-image: repeating-linear-gradient(
-			0deg,
-			#666,
-			#3d3d3d 1px,
-			transparent 1px,
-			transparent 8px
-		),
-		repeating-linear-gradient(
-			-90deg,
-			#666,
-			#666 1px,
-			transparent 1px,
-			transparent 16px
-		);
-	background-repeat: no-repeat;
+	background-color: get-color('background');
+	background-image: linear-gradient(rgba(74, 20, 140, 0.2) 1px, transparent 1px),
+		linear-gradient(90deg, rgba(74, 20, 140, 0.2) 1px, transparent 1px);
+	background-size: 20px 20px;
 	@include font('base', 'regular', 'primary');
 	color: get-color('text');
 }

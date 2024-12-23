@@ -47,7 +47,7 @@ export default {
 }
 </script>
 
-<style lang="scss" scoped>
+<style lang="scss">
 @use "@/assets/styles/globals.scss" as *;
 
 .field {
@@ -67,12 +67,15 @@ export default {
     border: 1px solid $color-nymph-hips;
     border-radius: 4px;
     color: $color-deep-violet;
-    background: transparent;
-    transition: border-color 0.2s;
+    background-color: rgba(255, 255, 255, 0.9);
+    transition: all 0.2s ease;
 
-    &:focus {
+    &:focus,
+    &:active {
       outline: none;
       border-color: $color-deep-violet;
+      box-shadow: rgba(74, 20, 140, 0.3) 0 0 0 2px;
+      background-color: white;
     }
 
     &::placeholder {

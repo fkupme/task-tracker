@@ -16,20 +16,43 @@
 				>
 				<span class="header__logo-text">Task</span>
 			</div>
-			<date-time-widget />
+			<day-bar />
+			<profile-widget class="header-profile-widget" />
 			<div
-			class="header-search"
+				class="header-fixed-button"
+				:class="{ 'header-fixed-button_active': isSearchActive }"
 			>
-				<div >
+				<div>
 					<search-query
-					v-if="isSearchActive"
-					@close="isSearchActive = false"
+						v-if="isSearchActive"
+						v-click-outside="() => toggle('isSearchActive')"
+						@click.stop
 					/>
 					<img
+						class="header-fixed-button-icon"
 						v-else
-						@click="isSearchActive = true"
+						@click.stop="toggle('isSearchActive')"
 						src="@/assets/icons/search.svg"
 						alt="поиск"
+					/>
+				</div>
+			</div>
+			<div
+				class="header-fixed-button header-fixed-button_task-create"
+				:class="{ 'header-fixed-button_active': isTaskCreateActive }"
+			>
+				<div>
+					<task-create-form
+						v-if="isTaskCreateActive"
+						v-click-outside="() => toggle('isTaskCreateActive')"
+						@click.stop
+					/>
+					<img
+						class="header-fixed-button-icon"
+						v-else
+						@click.stop="toggle('isTaskCreateActive')"
+						src="@/assets/icons/plus.svg"
+						alt="создать задачу"
 					/>
 				</div>
 			</div>
@@ -38,16 +61,19 @@
 </template>
 
 <script>
-import DateTimeWidget from "@/components/Widgets/DateTimeWidget.vue";
-import SearchQuery from "@/components/SearchQuery.vue";
+import DayBar from "@/components/DayBar.vue";
+import SearchQuery from "@/components/Forms/SearchQuery.vue";
+import TaskCreateForm from "@/components/Forms/TaskCreateForm.vue";
+import ProfileWidget from "@/components/Widgets/ProfileWidget.vue";
 
 export default {
 	name: "my-header",
-	components: { DateTimeWidget, SearchQuery },
+	components: { DayBar, SearchQuery, TaskCreateForm, ProfileWidget },
 	data() {
 		return {
 			isAnimating: [false, false],
 			isSearchActive: false,
+			isTaskCreateActive: false,
 		};
 	},
 	methods: {
@@ -58,9 +84,9 @@ export default {
 				this.isAnimating = [false, false];
 			}, 500);
 		},
-		toggleSearch() {
-			this.isSearchActive? this.isSearchActive = false : this.isSearchActive = true;
-		}
+		toggle(property) {
+			this[property] ? (this[property] = false) : (this[property] = true);
+		},
 	},
 };
 </script>
@@ -69,13 +95,17 @@ export default {
 @use "@/assets/styles/globals" as *;
 @use "sass:color";
 .header {
-	position: relative;
-	padding-top: 10px;
-	margin-bottom: 20px;
-	display: flex;
-	justify-content: space-between;
-	align-items: flex-start;
-
+		position: relative;
+    padding-top: 10px;
+    margin-bottom: 20px;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    justify-content: space-between;
+    align-items: flex-start;
+		.header-profile-widget {
+			grid-column: 2;
+			grid-row: 1 / span 2;
+		}
 	&__logo {
 		display: flex;
 		align-items: baseline;
@@ -85,7 +115,7 @@ export default {
 			@include font("2xl", "bold", "secondary", "tight");
 			color: $color-indigo;
 			text-shadow: 3px 2px 3px rgba(255, 255, 255, 0.2);
-			transition: transform 0.3s ease;
+			transition: all 0.3s ease;
 
 			&:first-child {
 				--skew: -10deg;
@@ -109,13 +139,27 @@ export default {
 		}
 	}
 
-	&-search {
+	&-fixed-button {
 		position: fixed;
 		right: 20px;
 		bottom: 20px;
-
-		& > img {
+		z-index: 1001;
+		text-align: right;
+		width: 100px;
+		transition: width 0.3s ease, opacity 0.3s ease;
+		&_active {
+			z-index: 1001;
+			opacity: 1;
+			width: 75vw;
+			transition: width 0.3s ease, opacity 0.3s ease;
+		}
+		&_task-create {
+			text-align: left;
+			left: 20px;
+		}
+		&-icon {
 			width: 50px;
+			transition: transform 0.3s ease;
 		}
 	}
 }

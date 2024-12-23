@@ -1,6 +1,8 @@
 <template>
 	<div class="day-bar">
-		{{ formattedDate }}
+		{{ formattedDate.day }}
+		<br>
+		{{ formattedDate.date }} {{ formattedDate.month }}
 	</div>
 </template>
 
@@ -24,7 +26,7 @@ export default {
 			const date = this.date.getDate()
 			const month = months[this.date.getMonth()]
 			
-			return `${day}, ${date} ${month}`
+			return {day,date, month};
 		}
 	},
 	mounted() {
@@ -50,6 +52,7 @@ export default {
 
 .day-bar {
 	color: $color-nymph-hips;
-	text-align: right;
+	text-align: left;
+	@include font('lg', 'medium', 'mono');
 }
 </style> 
