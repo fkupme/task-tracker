@@ -52,28 +52,25 @@ class AuthService {
 			console.log('Registration service started with:', userDto)
 
 			if (!userDto.name) {
+				console.log(userDto.name)
 				throw new BadRequestException('Имя пользователя обязательно')
 			}
 
 			const candidate = await this.usersService.getUserByEmail(userDto.email)
-			console.log('Existing user check:', candidate)
 
 			if (candidate) {
 				throw new BadRequestException('Пользователь с таким email уже существует')
 			}
 
 			const hashPassword = await bcrypt.hash(userDto.password, 5)
-			console.log('Password hashed')
 
 			const user = await this.usersService.createUser({
 				...userDto,
 				password: hashPassword
 			})
-			console.log('User created:', user)
 
 			return this.generateToken(user)
 		} catch (error) {
-			console.error('Registration error:', error)
 			throw error
 		}
 	}

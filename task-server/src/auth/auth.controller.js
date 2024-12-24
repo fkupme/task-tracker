@@ -19,7 +19,7 @@ class AuthController {
 
 // Применяем декораторы правильно
 Controller('auth')(AuthController)
-Post('registration')(AuthController.prototype, 'registration', Object.getOwnPropertyDescriptor(AuthController.prototype, 'registration'))
+Post('register')(AuthController.prototype, 'registration', Object.getOwnPropertyDescriptor(AuthController.prototype, 'registration'))
 
 Post('login')(AuthController.prototype, 'login', Object.getOwnPropertyDescriptor(AuthController.prototype, 'login'))
 

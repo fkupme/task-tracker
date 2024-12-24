@@ -15,15 +15,10 @@ import profileIcon from "@/assets/icons/auth.svg";
 
 export default {
 	name: "profile-widget",
-	data() {
-		return {
-			isAuth: false,
-		};
-	},
 	computed: {
-		// ...mapState({
-		// 	isAuth: (state) => state.auth.isAuth,
-		// }),
+		isAuth() {
+			return this.$store.state.auth.isAuth;
+		},
 		iconSource() {
 			return this.isAuth ? profileIcon : loginIcon;
 		},

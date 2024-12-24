@@ -1,15 +1,15 @@
 <template>
 	<div class="week-page">
 		<div class="week-page__header">
-			<div class="week-page__title">Неделя № {{ weekNumber }}</div>
+			<div class="week-page__title">Неделя № {{ weekIndex + 1 }}</div>
 			<div class="week-page__dates">{{ firstDay }} - {{ lastDay }}</div>
 		</div>
 		<div class="week-page__content">
 			<fast-day-component
-				v-for="(day, key) in days"
-				:date="key"
+				v-for="(day, index) in weekDays"
+				:date="day.date"
 				:day="day"
-				:key="key"
+				:key="index"
 				:active="true"
 			/>
 		</div>
@@ -18,25 +18,29 @@
 
 <script>
 import FastDayComponent from "@/components/FastDayComponent.vue";
-import { mapState } from 'vuex';
+import { mapState } from "vuex";
 
 export default {
 	name: "week-page",
 	components: { FastDayComponent },
+	props: {
+		weekIndex: {
+			type: Number,
+			required: true,
+		},
+	},
 	computed: {
 		...mapState({
-			days: state => state.temp.days
+			month: state => state.events
 		}),
-		weekNumber() {
-			const firstDate = new Date(Object.keys(this.days)[0]);
-			return Math.ceil(firstDate.getDate() / 7);
+		weekDays() {
+			return this.month.events.weeks?.[this.weekIndex] || []
 		},
 		firstDay() {
-			return Object.keys(this.days)[0].split("-")[2];
+			return this.weekDays[0]?.date?.split('-')[2] || ''
 		},
 		lastDay() {
-			const keys = Object.keys(this.days);
-			return keys[keys.length - 1].split("-")[2];
+			return this.weekDays[this.weekDays.length - 1]?.date?.split('-')[2] || ''
 		}
 	}
 };

@@ -1,24 +1,35 @@
 <template>
 	<main>
-			<div class="month">
-				<week-component class="month-line" :days="days" />
-				<week-component class="month-line" :days="days" />
-				<week-component class="month-line" :days="days" />
-				<week-component class="month-line" :days="days" />
-			</div>
+		<div class="month">
+			<week-component
+				v-for="(week, index) in month.weeks"
+				:key="index"
+				class="month-line"
+				:days="week"
+				:weekIndex="index"
+			/>
+		</div>
 	</main>
 </template>
 
 <script>
 import { mapState } from "vuex";
 import WeekComponent from "@/components/WeekComponent.vue";
+
 export default {
 	name: "month-component",
 	components: { WeekComponent },
 	computed: {
 		...mapState({
-			days: (state) => state.temp.days,
+			month: (state) => state.events.events,
 		}),
+	},
+	beforeMount() {
+		const date = new Date();
+		const param = `${date.getFullYear()}-${
+			date.getMonth() + 1
+		}-${date.getDate()}`;
+		this.$store.dispatch("events/fetchMonth", param);
 	},
 };
 </script>

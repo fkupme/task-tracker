@@ -1,10 +1,16 @@
 <template>
 	<article
 		class="fast-day"
-		@click="push('day', { date: date }, 300)"
+		@click="
+			push('day', {
+				date: date,
+				weekIndex: weekIndex,
+			})
+		"
 		:class="{
 			'fast-day_active': active,
 			'fast-day_weekend': isWeekend,
+			'is-not-current-month': !day.isCurrentMonth,
 		}"
 	>
 		<div class="fast-day__header">
@@ -15,7 +21,7 @@
 		<div class="fast-day__content">
 			<div class="fast-day__wrapper" v-if="active">
 				<div
-					v-for="task in day"
+					v-for="task in day.events"
 					:key="task.id"
 					class="fast-day-task"
 					:style="{ backgroundColor: getTaskColor(task.id) }"
@@ -28,7 +34,7 @@
 				<div class="fast-day-task-length">
 					<span class="fast-day-task-length__text">задач:</span>
 					<br />
-					{{ day.length }}
+					{{ day.events.length }}
 				</div>
 			</div>
 		</div>
@@ -43,7 +49,7 @@ export default {
 	mixins: [pushMixin],
 	props: {
 		day: {
-			type: Array,
+			type: Object,
 			required: true,
 		},
 		date: {
@@ -53,6 +59,10 @@ export default {
 		active: {
 			type: Boolean,
 			required: false,
+		},
+		weekIndex: {
+			type: Number,
+			required: true,
 		},
 	},
 	computed: {
@@ -83,6 +93,10 @@ export default {
 <style lang="scss" scoped>
 @use "@/assets/styles/globals" as *;
 @use "sass:color";
+
+.is-not-current-month {
+	opacity: 0.5;
+}
 
 .fast-day {
 	aspect-ratio: 3/4;

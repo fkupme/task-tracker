@@ -6,6 +6,7 @@ const net = require('net')
 const { exec } = require('child_process')
 const { promisify } = require('util')
 const execAsync = promisify(exec)
+const cors = require('cors')
 
 dotenv.config()
 
@@ -47,13 +48,10 @@ const waitForPort = async (port, timeout = 10000) => {
 async function killProcessOnPort(port) {
 	try {
 		if (process.platform === 'win32') {
-			// Windows
 			await execAsync(`FOR /F "tokens=5" %a in ('netstat -aon ^| find ":${port}" ^| find "LISTENING"') do taskkill /F /PID %a`)
 		} else {
-			// Linux/Mac
 			await execAsync(`lsof -i :${port} | grep LISTEN | awk '{print $2}' | xargs kill -9`)
 		}
-		// Даем время на освобождение порта
 		await new Promise(resolve => setTimeout(resolve, 1000))
 	} catch (error) {
 		console.log(`Процесс на порту ${port} не найден или уже остановлен`)
@@ -69,7 +67,14 @@ async function bootstrap() {
 		for (let i = 0; i < maxRetries; i++) {
 			try {
 				const app = await NestFactory.create(AppModule)
-				app.enableCors()
+				app.enableCors({
+					origin: ['http://localhost:5173', 'http://127.0.0.1:5173'],
+					methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+					allowedHeaders: ['Content-Type', 'Authorization'],
+					credentials: true,
+					maxAge: 86400,
+					exposedHeaders: ['Authorization']
+				})
 
 				const cleanup = async () => {
 					console.log('\nЗакрываем приложение...')

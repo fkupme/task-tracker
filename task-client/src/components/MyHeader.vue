@@ -88,6 +88,11 @@ export default {
 			this[property] ? (this[property] = false) : (this[property] = true);
 		},
 	},
+	computed: {
+		isAuth() {
+			return this.$store.state.auth.isAuth;
+		}
+	}
 };
 </script>
 

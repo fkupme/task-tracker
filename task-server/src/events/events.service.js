@@ -60,7 +60,7 @@ class EventsService {
 				userId: userId
 			}, { transaction })
 
-			// Проверяем тип события и создаем с��ответствующую запись
+			// Проверяем тип события и создаем соответствующую запись
 			if (eventDto.repeat) {
 				if (!eventDto.week_day && eventDto.week_day !== 0) {
 					throw new BadRequestException('week_day обязателен для повторяющихся событий')
@@ -105,21 +105,21 @@ class EventsService {
 			endDate.setMonth(endDate.getMonth() + 1)
 			endDate.setDate(0)
 
-			// Получаем первый понедельник (может быть в предыдущем месяце)
+			// Получаем первый понедельник
 			const firstDayOfView = new Date(startDate)
-			while (firstDayOfView.getDay() !== 1) { // 1 = Понедельник
+			while (firstDayOfView.getDay() !== 1) {
 				firstDayOfView.setDate(firstDayOfView.getDate() - 1)
 			}
 
-			// Получаем последнее воскресенье (может быть в следующем месяце)
+			// Получаем последнее воскресенье
 			const lastDayOfView = new Date(endDate)
-			while (lastDayOfView.getDay() !== 0) { // 0 = Воскресенье
+			while (lastDayOfView.getDay() !== 0) {
 				lastDayOfView.setDate(lastDayOfView.getDate() + 1)
 			}
 
-			// Получаем все события за период
+			// Получаем события из БД
 			const [events] = await this.sequelize.query(`
-				SELECT 
+				SELECT DISTINCT
 					be.id,
 					be.event_name as task,
 					be.start_time as start,
@@ -142,7 +142,17 @@ class EventsService {
 				LEFT JOIN single_events se ON be.id = se.base_event_id
 				WHERE 
 					(se.date BETWEEN :firstDay AND :lastDay)
-					OR re.id IS NOT NULL
+					OR (re.id IS NOT NULL AND re.week_day IS NOT NULL)
+				GROUP BY
+					be.id, 
+					be.event_name, 
+					be.start_time, 
+					be.end_time,
+					re.week_day,
+					re.exceptions,
+					re.general_comment,
+					se.date,
+					se.comment
 			`, {
 				replacements: {
 					firstDay: firstDayOfView.toISOString(),
@@ -150,44 +160,69 @@ class EventsService {
 				}
 			})
 
-			// Формируем результат
-			const result = {}
+			// Формируем массив недель
+			const weeks = []
 			let currentDate = new Date(firstDayOfView)
+			let currentWeek = []
 
 			while (currentDate <= lastDayOfView) {
 				const dateStr = currentDate.toISOString().split('T')[0]
 				const dayEvents = events.filter(event => {
+					// Проверяем одиночные события
 					if (event.date) {
-						// Одиночное событие
 						return event.date.toISOString().split('T')[0] === dateStr
-					} else {
-						// Повторяющееся событие
+					}
+					
+					// Проверяем повторяющиеся события
+					if (event.repeat) {
 						const dayOfWeek = currentDate.getDay()
 						const weekDayMap = {
 							'sunday': 0, 'monday': 1, 'tuesday': 2,
 							'wednesday': 3, 'thursday': 4, 'friday': 5, 'saturday': 6
 						}
-						return weekDayMap[event.repeat] === dayOfWeek &&
-							(!event.exceptions || !event.exceptions.includes(dateStr))
+						// Проверяем исключения
+						return weekDayMap[event.repeat] === dayOfWeek && 
+							   (!event.exceptions || !event.exceptions.includes(dateStr))
 					}
+					
+					return false
 				})
 
-				result[dateStr] = dayEvents.map(event => ({
-					id: event.id,
-					task: event.task,
-					start: event.start,
-					end: event.end,
-					repeat: event.repeat,
-					comment: event.date ? event.single_comment : event.comment
-				}))
+				// Убираем дубликаты по ID
+				const uniqueEvents = Array.from(new Map(
+					dayEvents.map(event => [event.id, event])
+				).values())
+
+				const dayData = {
+					date: dateStr,
+					events: uniqueEvents.map(event => ({
+						id: event.id,
+						task: event.task,
+						start: event.start,
+						end: event.end,
+						repeat: event.repeat,
+						comment: event.date ? event.single_comment : event.comment
+					})),
+					isCurrentMonth: currentDate.getMonth() === startDate.getMonth()
+				}
+
+				currentWeek.push(dayData)
+
+				if (currentDate.getDay() === 0 || currentDate.getTime() === lastDayOfView.getTime()) {
+					weeks.push([...currentWeek])
+					currentWeek = []
+				}
 
 				currentDate.setDate(currentDate.getDate() + 1)
 			}
 
-			return result
-
+			return {
+				weeks,
+				month: startDate.getMonth(),
+				year: startDate.getFullYear()
+			}
 		} catch (error) {
-			console.error('Error getting month events:', error)
+			console.error('Error in getMonthEvents:', error)
 			throw error
 		}
 	}

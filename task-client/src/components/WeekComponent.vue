@@ -1,11 +1,11 @@
 <template>
 	<div class="wrapper">
 		<div class="week-header">
-			<div class="week-header__title">Неделя № {{ 1 }}</div>
+			<div class="week-header__title">Неделя № {{ weekIndex + 1 }}</div>
 			<div class="week-header__dates">{{ firstDay }} - {{ lastDay }}</div>
 			<button
 				class="week-component-activate-button"
-				@click="push('week', { week: this.week }, 500), (isActive = !isActive)"
+				@click="push('week', { weekIndex: weekIndex }, 500), (isActive = !isActive)"
 			>
 				<div class="bar1" :class="{ bar1_active: isActive }"></div>
 				<div class="bar2" :class="{ bar2_active: isActive }"></div>
@@ -16,13 +16,14 @@
 				<fast-day-component
 					class="week-component-day"
 					v-for="(day, key, index) in days"
-					:date="key"
+					:date="day.date"
 					:day="day"
 					:key="key"
 					:style="{
 						'transition-delay': isActive ? `${index * 0.04}s` : null,
 						transform: isActive ? 'translateY(-10px)' : null,
 					}"
+					:weekIndex="weekIndex"
 				/>
 			</div>
 		</div>
@@ -37,22 +38,24 @@ export default {
 	data() {
 		return {
 			isActive: false,
-			week: 1,
 		};
 	},
 	name: "week-component",
 	components: { FastDayComponent },
 	props: {
 		days: Object,
+		weekIndex: {
+			type: Number,
+			required: true
+		},
 	},
 	mixins: [pushMixin],
 	computed: {
 		firstDay() {
-			return Object.keys(this.days)[0].split("-")[2];
+			return this.days[0]?.date?.split("-")[2] || "";
 		},
 		lastDay() {
-			const keys = Object.keys(this.days);
-			return keys[keys.length - 1].split("-")[2];
+			return this.days[this.days.length - 1]?.date?.split("-")[2] || "";
 		},
 	},
 };
