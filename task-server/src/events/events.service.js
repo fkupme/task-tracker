@@ -57,7 +57,7 @@ class EventsService {
 				start_time: eventDto.start_time,
 				end_time: eventDto.end_time,
 				general_comment: eventDto.general_comment,
-				userId: userId
+				user_id: userId
 			}, { transaction })
 
 			// Проверяем тип события и создаем соответствующую запись
@@ -96,7 +96,7 @@ class EventsService {
 	 * Получение событий за месяц
 	 * GET /events/month?date=2024-03
 	 */
-	async getMonthEvents(date) {
+	async getMonthEvents(date, userId) {
 		try {
 			// Получаем первый и последний день месяца
 			const startDate = new Date(date)
@@ -117,48 +117,51 @@ class EventsService {
 				lastDayOfView.setDate(lastDayOfView.getDate() + 1)
 			}
 
-			// Получаем события из БД
-			const [events] = await this.sequelize.query(`
+			const events = await this.sequelize.query(`
 				SELECT DISTINCT
-					be.id,
-					be.event_name as task,
-					be.start_time as start,
-					be.end_time as end,
-					CASE 
-						WHEN re.week_day = 0 THEN 'sunday'
-						WHEN re.week_day = 1 THEN 'monday'
-						WHEN re.week_day = 2 THEN 'tuesday'
-						WHEN re.week_day = 3 THEN 'wednesday'
-						WHEN re.week_day = 4 THEN 'thursday'
-						WHEN re.week_day = 5 THEN 'friday'
-						WHEN re.week_day = 6 THEN 'saturday'
-					END as repeat,
-					re.exceptions,
-					re.general_comment as comment,
-					se.date,
-					se.comment as single_comment
+						be.id,
+						be.event_name as task,
+						to_char(be.start_time::time, 'HH24:MI') as start,
+						to_char(be.end_time::time, 'HH24:MI') as end,
+						CASE 
+								WHEN re.week_day = 0 THEN 'sunday'
+								WHEN re.week_day = 1 THEN 'monday'
+								WHEN re.week_day = 2 THEN 'tuesday'
+								WHEN re.week_day = 3 THEN 'wednesday'
+								WHEN re.week_day = 4 THEN 'thursday'
+								WHEN re.week_day = 5 THEN 'friday'
+								WHEN re.week_day = 6 THEN 'saturday'
+						END as repeat,
+						re.exceptions,
+						re.general_comment as comment,
+						se.date,
+						se.comment as single_comment
 				FROM base_events be
 				LEFT JOIN recurring_events re ON be.id = re.base_event_id
 				LEFT JOIN single_events se ON be.id = se.base_event_id
-				WHERE 
-					(se.date BETWEEN :firstDay AND :lastDay)
-					OR (re.id IS NOT NULL AND re.week_day IS NOT NULL)
+				WHERE be.user_id = :userId
+						AND (
+								(se.date BETWEEN :firstDay AND :lastDay)
+								OR (re.id IS NOT NULL AND re.week_day IS NOT NULL)
+						)
 				GROUP BY
-					be.id, 
-					be.event_name, 
-					be.start_time, 
-					be.end_time,
-					re.week_day,
-					re.exceptions,
-					re.general_comment,
-					se.date,
-					se.comment
-			`, {
+						be.id, 
+						be.event_name, 
+						be.start_time, 
+						be.end_time,
+						re.week_day,
+						re.exceptions,
+						re.general_comment,
+						se.date,
+						se.comment
+		`, {
 				replacements: {
-					firstDay: firstDayOfView.toISOString(),
-					lastDay: lastDayOfView.toISOString()
-				}
-			})
+						userId,
+						firstDay: firstDayOfView.toISOString(),
+						lastDay: lastDayOfView.toISOString()
+				},
+				type: this.sequelize.QueryTypes.SELECT
+		});
 
 			// Формируем массив недель
 			const weeks = []
@@ -168,27 +171,24 @@ class EventsService {
 			while (currentDate <= lastDayOfView) {
 				const dateStr = currentDate.toISOString().split('T')[0]
 				const dayEvents = events.filter(event => {
-					// Проверяем одиночные события
 					if (event.date) {
 						return event.date.toISOString().split('T')[0] === dateStr
 					}
-					
-					// Проверяем повторяющиеся события
+
 					if (event.repeat) {
 						const dayOfWeek = currentDate.getDay()
 						const weekDayMap = {
 							'sunday': 0, 'monday': 1, 'tuesday': 2,
 							'wednesday': 3, 'thursday': 4, 'friday': 5, 'saturday': 6
 						}
-						// Проверяем исключения
-						return weekDayMap[event.repeat] === dayOfWeek && 
-							   (!event.exceptions || !event.exceptions.includes(dateStr))
+						return weekDayMap[event.repeat] === dayOfWeek &&
+							(!event.exceptions || !event.exceptions.includes(dateStr))
 					}
-					
+
 					return false
 				})
 
-				// Убираем дубликаты по ID
+				// Убираем дубликаты
 				const uniqueEvents = Array.from(new Map(
 					dayEvents.map(event => [event.id, event])
 				).values())
@@ -324,56 +324,57 @@ class EventsService {
 	 *   }
 	 * ]
 	 */
-	async findEventsByName(name) {
-		try {
-			const events = await this.sequelize.query(`
-				SELECT 
-					be.id,
-					be.event_name,
-					be.start_time,
-					be.end_time,
-					CASE 
-						WHEN re.id IS NOT NULL THEN true
-						ELSE false
-					END as repeat,
-					re.week_day,
-					re.exceptions,
-					re.general_comment as recurring_comment,
-					se.date,
-					se.comment as single_comment
-				FROM base_events be
-				LEFT JOIN recurring_events re ON be.id = re.base_event_id
-				LEFT JOIN single_events se ON be.id = se.base_event_id
-				WHERE LOWER(be.event_name) LIKE LOWER(:search)
-				ORDER BY be.event_name
-			`, {
-				replacements: {
-					search: `%${name}%`
-				},
-				type: this.sequelize.QueryTypes.SELECT
-			})
+	async findEventsByName(name, userId) {
+    try {
+        const events = await this.sequelize.query(`
+            SELECT 
+                be.id,
+                be.event_name,
+                be.start_time,
+                be.end_time,
+                CASE 
+                    WHEN re.id IS NOT NULL THEN true
+                    ELSE false
+                END as repeat,
+                re.week_day,
+                re.exceptions,
+                re.general_comment as recurring_comment,
+                se.date,
+                se.comment as single_comment
+            FROM base_events be
+            LEFT JOIN recurring_events re ON be.id = re.base_event_id
+            LEFT JOIN single_events se ON be.id = se.base_event_id
+            WHERE LOWER(be.event_name) LIKE LOWER(:search)
+            AND be.user_id = :userId
+            ORDER BY be.event_name
+        `, {
+            replacements: {
+                search: `%${name}%`,
+                userId: userId
+            },
+            type: this.sequelize.QueryTypes.SELECT
+        });
 
-			return events.map(event => ({
-				id: event.id,
-				event_name: event.event_name,
-				start_time: event.start_time,
-				end_time: event.end_time,
-				repeat: event.repeat,
-				...(event.repeat ? {
-					week_day: event.week_day,
-					exceptions: event.exceptions,
-					comment: event.recurring_comment
-				} : {
-					date: event.date,
-					comment: event.single_comment
-				})
-			}))
-
-		} catch (error) {
-			console.error('Error finding events by name:', error)
-			throw error
-		}
-	}
+        return events.map(event => ({
+            id: event.id,
+            event_name: event.event_name,
+            start_time: event.start_time,
+            end_time: event.end_time,
+            repeat: event.repeat,
+            ...(event.repeat ? {
+                week_day: event.week_day,
+                exceptions: event.exceptions,
+                comment: event.recurring_comment
+            } : {
+                date: event.date,
+                comment: event.single_comment
+            })
+        }));
+    } catch (error) {
+        console.error('Error finding events by name:', error);
+        throw error;
+    }
+}
 
 	/**
 	 * Получение события по ID

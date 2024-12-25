@@ -5,7 +5,9 @@
 			<div class="week-header__dates">{{ firstDay }} - {{ lastDay }}</div>
 			<button
 				class="week-component-activate-button"
-				@click="push('week', { weekIndex: weekIndex }, 500), (isActive = !isActive)"
+				@click="
+					push('week', { weekIndex: weekIndex }, 500), (isActive = !isActive)
+				"
 			>
 				<div class="bar1" :class="{ bar1_active: isActive }"></div>
 				<div class="bar2" :class="{ bar2_active: isActive }"></div>
@@ -15,15 +17,16 @@
 			<div class="week-component">
 				<fast-day-component
 					class="week-component-day"
-					v-for="(day, key, index) in days"
+					v-for="(day, index) in week"
+					:key="day.date"
 					:date="day.date"
 					:day="day"
-					:key="key"
+					:overlaps="day.overlap"
 					:style="{
 						'transition-delay': isActive ? `${index * 0.04}s` : null,
 						transform: isActive ? 'translateY(-10px)' : null,
 					}"
-					:weekIndex="weekIndex"
+					:weekIndex="Number(weekIndex)"
 				/>
 			</div>
 		</div>
@@ -42,20 +45,22 @@ export default {
 	},
 	name: "week-component",
 	components: { FastDayComponent },
+	mixins: [pushMixin],
 	props: {
-		days: Object,
+		week: Array,
 		weekIndex: {
 			type: Number,
-			required: true
+			required: true,
 		},
 	},
-	mixins: [pushMixin],
 	computed: {
 		firstDay() {
-			return this.days[0]?.date?.split("-")[2] || "";
+			if (!this.week || !this.week.length) return "";
+			return this.week[0]?.date?.split("-")[2] || "";
 		},
 		lastDay() {
-			return this.days[this.days.length - 1]?.date?.split("-")[2] || "";
+			if (!this.week || !this.week.length) return "";
+				return this.week[this.week.length - 1]?.date?.split("-")[2] || "";
 		},
 	},
 };

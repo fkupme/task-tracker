@@ -1,135 +1,180 @@
 <template>
-  <form class="task-form" @submit.prevent="handleSubmit">
-    <h3 class="task-form__title">Редактировать задачу</h3>
+	<form class="task-form" @submit.prevent="handleSubmit">
+		<h3 class="task-form__title">Редактировать задачу</h3>
+		<my-checkbox 
+		v-model="form.repeat" 
+		id="repeat-edit"
+		:checked="form.repeat"
+		>
+			Повторять
+		</my-checkbox>
+		<my-field
+			v-model="form.name"
+			label="Название"
+			placeholder="Введите название задачи"
+			id="task-edit"
+			:error="errors.name"
+		/>
 
-    <my-field
-      v-model="form.task"
-      label="Название"
-      placeholder="Введите название задачи"
-      id="task-edit"
-      :error="errors.task"
-    />
+		<div class="task-form__row">
+			<my-field
+				v-model="form.start"
+				label="Начало"
+				type="time"
+				id="start-edit"
+				:error="errors.start"
+			/>
 
-    <div class="task-form__row">
-      <my-field
-        v-model="form.start"
-        label="Начало"
-        type="time"
-        id="start-edit"
-        :error="errors.start"
-      />
+			<my-field
+				v-model="form.end"
+				label="Конец"
+				type="time"
+				id="end-edit"
+				:error="errors.end"
+			/>
+		</div>
 
-      <my-field
-        v-model="form.end"
-        label="Конец"
-        type="time"
-        id="end-edit"
-        :error="errors.end"
-      />
-    </div>
+		<template v-if="form.repeat">
+			<dropdown-list
+				v-model="form.week_day"
+				label="День недели"
+				:items="weekDays"
+				id="week-day-edit"
+			/>
 
-    <my-field
-      v-model="form.comment"
-      label="Комментарий"
-      placeholder="Добавьте комментарий"
-      type="textarea"
-      id="comment-edit"
-    />
+			<my-field
+				v-model="form.exceptions"
+				label="Исключения"
+				type="date"
+				id="exceptions-edit"
+			/>
+		</template>
+		<template v-else>
+			<my-field v-model="form.date" label="Дата" type="date" id="date-edit" />
+		</template>
 
-    <div class="task-form__actions">
-      <button class="task-form__submit" type="submit">
-        Сохранить
-      </button>
-      <button 
-        class="task-form__delete" 
-        type="button"
-        @click="handleDelete"
-      >
-        Удалить
-      </button>
-    </div>
-  </form>
+		<my-field
+			v-model="form.comment"
+			label="Комментарий"
+			placeholder="Добавьте комментарий"
+			type="textarea"
+			id="comment-edit"
+		/>
+
+		<div class="task-form__actions">
+			<button class="task-form__submit" type="submit" @click="handleSubmit">Сохранить</button>
+			<button class="task-form__cancel" type="button" @click="$emit('close')">
+				Отмена
+			</button>
+		</div>
+	</form>
 </template>
 
 <script>
+import { mapActions } from 'vuex'
 export default {
-  name: 'task-edit-form',
-  props: {
-    task: {
-      type: Object,
-      required: true
-    }
-  },
-  data() {
-    return {
-      form: {
-        task: this.task.task,
-        start: this.task.start,
-        end: this.task.end,
-        comment: this.task.comment
-      },
-      errors: {
-        task: '',
-        start: '',
-        end: ''
-      }
-    }
-  },
-  methods: {
-    handleSubmit() {
-      // Валидация и сохранение изменений
-    },
-    handleDelete() {
-      // Удаление задачи
-    }
-  }
-}
+	name: "task-edit-form",
+	props: {
+		task: {
+			type: Object,
+			required: true,
+		},
+	},
+	data() {
+		return {
+			weekDays: [
+				{ value: 1, label: "Понедельник" },
+				{ value: 2, label: "Вторник" },
+				{ value: 3, label: "Среда" },
+				{ value: 4, label: "Четверг" },
+				{ value: 5, label: "Пятница" },
+				{ value: 6, label: "Суббота" },
+				{ value: 0, label: "Воскресенье" },
+			],
+			form: {
+				name: this.task.task,
+				start: this.task.start,
+				end: this.task.end,
+				comment: this.task.comment,
+				repeat: Boolean(this.task.repeat),
+				week_day: this.task.repeat
+					? this.getWeekDayNumber(this.task.repeat)
+					: null,
+				exceptions: this.task.exceptions || null,
+				date: !this.task.repeat ? this.task.date : null,
+			},
+			errors: {
+				name: "",
+				start: "",
+				end: "",
+			},
+		};
+	},
+	methods: {
+		getWeekDayNumber(day) {
+			const weekDays = {
+				sunday: 0,
+				monday: 1,
+				tuesday: 2,
+				wednesday: 3,
+				thursday: 4,
+				friday: 5,
+				saturday: 6,
+			};
+			return weekDays[day] || null;
+		},
+		...mapActions({ updateEvent: 'events/updateEvent' }),
+		handleSubmit() {
+			this.updateEvent({ id: this.task.id, event: this.form });
+			this.$emit('close');
+		},
+	},
+};
 </script>
 
 <style lang="scss" scoped>
-@use '@/assets/styles/globals' as *;
+@use "@/assets/styles/globals" as *;
 
 .task-form {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  padding: 1rem;
+	width: 70vw;
+	display: flex;
+	flex-direction: column;
+	gap: 1rem;
+	padding: 1rem;
+	&__title {
+		@include font("lg", "bold", "primary");
+		color: $color-deep-violet;
+	}
 
-  &__title {
-    @include font('lg', 'bold', 'primary');
-    color: $color-deep-violet;
-  }
+	&__row {
+		display: flex;
+		gap: 1rem;
+		width: 100%;
+	}
 
-  &__row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1rem;
-  }
+	&__actions {
+		display: flex;
+		gap: 1rem;
+	}
 
-  &__actions {
-    display: flex;
-    gap: 1rem;
-  }
+	&__submit {
+		@include font("base", "medium", "primary");
+		flex: 1;
+		padding: 0.5rem;
+		background-color: $color-deep-violet;
+		color: $color-nymph-hips;
+		border: none;
+		border-radius: 4px;
+	}
 
-  &__submit {
-    @include font('base', 'medium', 'primary');
-    flex: 1;
-    padding: 0.5rem;
-    background-color: $color-deep-violet;
-    color: $color-nymph-hips;
-    border: none;
-    border-radius: 4px;
-  }
-
-  &__delete {
-    @include font('base', 'medium', 'primary');
-    flex: 1;
-    padding: 0.5rem;
-    background-color: #dc3545;
-    color: white;
-    border: none;
-    border-radius: 4px;
-  }
+	&__cancel {
+		@include font("base", "medium", "primary");
+		flex: 1;
+		padding: 0.5rem;
+		background-color: get-color("border");
+		color: white;
+		border: none;
+		border-radius: 4px;
+	}
 }
 </style> 

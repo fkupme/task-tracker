@@ -1,5 +1,8 @@
 <template>
 	<article class="task">
+		<task-edit-form :task="task" v-if="showEditForm"
+		@close="closeEditForm"
+		 class="task-edit-form" v-click-outside="closeEditForm"/>
 		<h3 class="task__name">{{ task.task }}</h3>
 		<div class="task-time">{{ task.start }} - {{ task.end }}</div>
 		<div class="task-address"></div>
@@ -29,10 +32,10 @@
 					v-if="showSettings"
 					v-click-outside="closeSettings"
 				>
-					<button class="task-settings-actions__button button">
+					<button @click.prevent="toggle('showEditForm')" class="task-settings-actions__button button">
 						Редактировать
 					</button>
-					<button class="task-settings-actions__button button">Удалить</button>
+					<button @click.prevent="deleteTask" class="task-settings-actions__button button">Удалить</button>
 				</div>
 				<button
 					@click.stop="toggle('showSettings')"
@@ -51,13 +54,18 @@
 
 <script>
 import { clickOutside } from "@/directives/clickOutside";
+import TaskEditForm from "@/components/forms/TaskEditForm.vue";
 
 export default {
 	data() {
 		return {
 			showComment: false,
 			showSettings: false,
+			showEditForm: false,
 		};
+	},
+	components: {
+		TaskEditForm,
 	},
 	props: {
 		task: Object,
@@ -72,6 +80,13 @@ export default {
 		closeSettings() {
 			this.showSettings = false;
 		},
+		closeEditForm() {
+			this.showEditForm = false;
+		},
+		deleteTask() {
+			this.$store.dispatch('events/deleteEvent', this.task.id),
+			this.$store.dispatch('events/fetchMonth', new Date().toISOString().split('T')[0])
+		}
 	},
 	name: "task-component",
 	directives: {
@@ -95,6 +110,14 @@ export default {
 	color: $color-deep-violet;
 	padding: 2px;
 	margin-block: 1dvh;
+	position: relative;
+	&-edit-form {
+		position: fixed;
+		top: 50%;
+		left: 50%;
+		transform: translate(-50%, -50%);
+		z-index: 1002;
+	}
 	&__name {
 		text-transform: capitalize;
 		word-break: break-word;

@@ -6,11 +6,12 @@
 		</div>
 		<div class="week-page__content">
 			<fast-day-component
-				v-for="(day, index) in weekDays"
+				v-for="(day, index) in week"
 				:date="day.date"
 				:day="day"
 				:key="index"
 				:active="true"
+				:weekIndex="weekIndex"
 			/>
 		</div>
 	</div>
@@ -27,22 +28,25 @@ export default {
 		weekIndex: {
 			type: Number,
 			required: true,
+			validator: (value) => {
+				return Number.isInteger(value) && value >= 0;
+			},
 		},
 	},
 	computed: {
 		...mapState({
-			month: state => state.events
+			month: (state) => state.events.events.weeks,
 		}),
-		weekDays() {
-			return this.month.events.weeks?.[this.weekIndex] || []
+		week() {
+			return this.month[this.weekIndex] || [];
 		},
 		firstDay() {
-			return this.weekDays[0]?.date?.split('-')[2] || ''
+			return this.week[0]?.date?.split("-")[2] || "";
 		},
 		lastDay() {
-			return this.weekDays[this.weekDays.length - 1]?.date?.split('-')[2] || ''
-		}
-	}
+			return this.week[this.week.length - 1]?.date?.split("-")[2] || "";
+		},
+	},
 };
 </script>
 
@@ -62,7 +66,7 @@ export default {
 
 	&__title {
 		@include font("m", "medium", "primary");
-		color: $color-deep-violet;
+		color: get-color("primary");
 	}
 
 	&__dates {

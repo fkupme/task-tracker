@@ -22,6 +22,7 @@
 </template>
 
 <script>
+import { mapState } from 'vuex';
 import TaskComponent from "./TaskComponent.vue";
 
 export default {
@@ -33,6 +34,11 @@ export default {
 			maxZIndex: 2,
 			taskZIndexes: new Map(),
 		};
+	},
+	computed: {
+		...mapState({
+			day: (state) => state.events.events,
+		}),
 	},
 
 	created() {

@@ -1,16 +1,21 @@
 const { Controller, Get, Post, Put, Delete, Body, Param, Query, UseGuards, Req, Inject } = require('@nestjs/common')
 const { EventsService } = require('./events.service')
 const { JwtAuthGuard } = require('../auth/jwt-auth.guard')
+const { JwtService } = require('@nestjs/jwt')
+const dotenv = require('dotenv')
+dotenv.config()
 
 class EventsController {
 	constructor(eventsService) {
 		this.eventsService = eventsService
+		this.jwtService = new JwtService({ secret: process.env.JWT_SECRET })
 	}
 }
 
 // Определяем методы и сразу применяем декораторы
 Object.defineProperty(EventsController.prototype, 'createEvent', {
 	value: async function (eventDto, req) {
+		console.log(eventDto)
 		return await this.eventsService.createEvent(eventDto, req.user.id)
 	},
 	writable: true,
@@ -21,24 +26,35 @@ Body()(EventsController.prototype, 'createEvent', 0)
 Req()(EventsController.prototype, 'createEvent', 1)
 
 Object.defineProperty(EventsController.prototype, 'getMonthEvents', {
-	value: async function (date) {
-		return await this.eventsService.getMonthEvents(date)
+	value: async function (date, req) {
+		try {
+			const token = req.headers.authorization.split(' ')[1]
+			const userId = this.jwtService.verify(token).id
+			return await this.eventsService.getMonthEvents(date, userId)
+		} catch (error) {
+			console.error('Controller error:', error)
+			throw error
+		}
 	},
 	writable: true,
 	enumerable: true
 })
 Get('month')(EventsController.prototype, 'getMonthEvents', Object.getOwnPropertyDescriptor(EventsController.prototype, 'getMonthEvents'))
 Query('date')(EventsController.prototype, 'getMonthEvents', 0)
+Req()(EventsController.prototype, 'getMonthEvents', 1)
 
 Object.defineProperty(EventsController.prototype, 'findEventsByName', {
-	value: async function (name) {
-		return await this.eventsService.findEventsByName(name)
+	value: async function (name, req) {
+		const token = req.headers.authorization.split(' ')[1]
+		const userId = this.jwtService.verify(token).id
+		return await this.eventsService.findEventsByName(name, userId)
 	},
 	writable: true,
 	enumerable: true
 })
 Get('search')(EventsController.prototype, 'findEventsByName', Object.getOwnPropertyDescriptor(EventsController.prototype, 'findEventsByName'))
 Query('name')(EventsController.prototype, 'findEventsByName', 0)
+Req()(EventsController.prototype, 'findEventsByName', 1)
 
 Object.defineProperty(EventsController.prototype, 'findEventById', {
 	value: async function (id) {

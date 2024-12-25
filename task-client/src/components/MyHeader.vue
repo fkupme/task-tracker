@@ -46,6 +46,7 @@
 						v-if="isTaskCreateActive"
 						v-click-outside="() => toggle('isTaskCreateActive')"
 						@click.stop
+						@close="toggle('isTaskCreateActive')"
 					/>
 					<img
 						class="header-fixed-button-icon"

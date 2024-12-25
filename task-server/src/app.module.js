@@ -1,8 +1,6 @@
 const { Module } = require('@nestjs/common')
 const { Sequelize } = require('sequelize')
 const dotenv = require('dotenv')
-const { TaskController } = require('./tasks/tasks.controller')
-const { TaskService } = require('./tasks/tasks.service')
 const { AuthController } = require('./auth/auth.controller')
 const { AuthService } = require('./auth/auth.service')
 const { UsersService } = require('./users/users.service')
@@ -53,7 +51,6 @@ const moduleDefinition = {
 			provide: 'SEQUELIZE',
 			useValue: sequelize
 		},
-		TaskService,
 		AuthService,
 		UsersService
 	]

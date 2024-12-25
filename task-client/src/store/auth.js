@@ -84,6 +84,7 @@ export const authModule = {
 				if (data.token) {
 					commit('setToken', data.token)
 				}
+				
 				return data
 			} catch (error) {
 				console.error('Login error:', error)
@@ -93,6 +94,7 @@ export const authModule = {
 
 		logout({ commit }) {
 			commit('setToken', null)
+			localStorage.clear()
 		}
 	},
 	getters: {

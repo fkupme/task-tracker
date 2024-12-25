@@ -38,6 +38,7 @@
 				</div>
 			</div>
 		</div>
+		<div class="fast-day__overlap" v-if="this.day.overlap"></div>
 	</article>
 </template>
 
@@ -55,6 +56,7 @@ export default {
 		date: {
 			type: String,
 			required: true,
+			default: "",
 		},
 		active: {
 			type: Boolean,
@@ -73,7 +75,9 @@ export default {
 	},
 	methods: {
 		dateParse(date) {
-			return date.split("-")[2];
+			if (!date) return "";
+			const [year, month, day] = date.split("-");
+			return day;
 		},
 		getWeekDay() {
 			const days = ["ВС", "ПН", "ВТ", "СР", "ЧТ", "ПТ", "СБ"];
@@ -107,6 +111,24 @@ export default {
 	transition: 0.3s ease-in-out;
 	max-width: 100%;
 	min-width: 0;
+	position: relative;
+	&__overlap {
+    position: absolute;
+    bottom: 5px;
+    right: 5px;
+    width: 8px;
+    height: 8px;
+    background: radial-gradient(circle at 40% 40%, 
+        rgb(255, 0, 255) 0%, 
+        rgb(181, 0, 191) 60%,
+        rgb(145, 0, 153) 100% 
+    );
+    border-radius: 50%;
+    box-shadow: 
+        0 0 2px 1px rgba(181, 0, 191, 0.7),
+        0 0 4px 2px rgba(181, 0, 191, 0.5),
+        0 0 6px 3px rgba(181, 0, 191, 0.3);
+}
 	&:active {
 		background-color: color.adjust($color-nymph-hips, $lightness: 5%);
 		transform: translateY(-10px);
