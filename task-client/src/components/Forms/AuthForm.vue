@@ -201,7 +201,8 @@ export default {
 				} else {
 					await this.fetchUser({ ...this.authForm });
 				}
-				this.$router.push("/profile");
+				
+				this.$router.push("/");
 			} catch (error) {
 				console.error("Auth error:", error);
 			}

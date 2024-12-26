@@ -82,10 +82,8 @@ export default {
 		},
 		getMonth() {
 			if (localStorage.events) {
-				console.log('from cache')
 				this.$store.dispatch("events/getEventsFromCache");
 			} else {
-				console.log('from server')
 				const date = new Date().toISOString().split('T')[0];
 				this.$store.dispatch("events/fetchMonth", date);
 			}
@@ -93,7 +91,6 @@ export default {
 	},
 	created() {
 		this.getMonth();
-		console.log(this.month)
 	},
 };
 </script>
