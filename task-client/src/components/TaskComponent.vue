@@ -54,7 +54,7 @@
 
 <script>
 import { clickOutside } from "@/directives/clickOutside";
-import TaskEditForm from "@/components/forms/TaskEditForm.vue";
+import TaskEditForm from "@/components/Forms/TaskEditForm.vue";
 
 export default {
 	data() {

@@ -23,7 +23,7 @@
 
 <script>
 import { mapState } from 'vuex';
-import TaskComponent from "./TaskComponent.vue";
+import TaskComponent from "@/components/TaskComponent.vue";
 
 export default {
 	name: "day-component",
