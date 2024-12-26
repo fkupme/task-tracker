@@ -9,8 +9,9 @@
 			:error="errors.name"
 		/>
 
-		<div class="task-form__row">
+		<div class="task-form-row">
 			<my-field
+				class="task-form-row__field"
 				v-model="form.start"
 				label="Начало"
 				type="time"
@@ -19,6 +20,7 @@
 			/>
 
 			<my-field
+				class="task-form-row__field"
 				v-model="form.end"
 				label="Конец"
 				type="time"
@@ -150,10 +152,14 @@ export default {
 		color: $color-deep-violet;
 	}
 
-	&__row {
+	&-row {
 		display: flex;
-		gap: 1rem;
+		justify-content: space-between;
+		gap: .5rem;
 		width: 100%;
+		&__field {
+			width: clamp(110px, 25vw , 170px); 
+		}
 	}
 
 	&__actions {

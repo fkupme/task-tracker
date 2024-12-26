@@ -37,7 +37,7 @@
 
 		<div class="task-form-row">
 			<my-field
-				class="task-form__field"
+				class="task-form-row__field"
 				v-model="form.start"
 				label="Начало"
 				type="time"
@@ -46,7 +46,7 @@
 			/>
 
 			<my-field
-				class="task-form__field"
+				class="task-form-row__field"
 				v-model="form.end"
 				label="Конец"
 				type="time"
@@ -160,8 +160,12 @@ export default {
 	}
 	&-row {
 		display: flex;
-		gap: 1rem;
+		justify-content: space-between;
+		gap: .5rem;
 		width: 100%;
+		&__field {
+			width: clamp(110px, 25vw , 170px); 
+		}
 	}
 
 	&__submit {
