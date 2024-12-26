@@ -1,0 +1,33 @@
+# Dependencies
+node_modules
+node_modules/
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Editor directories
+.idea
+.vscode
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+
+# System Files
+.DS_Store
+Thumbs.db
+
+# Оставляем сборки
+!task-client/dist
+!task-server/dist
+
+# Оставляем дамп базы данных
+!task-server/database/dump.sql
