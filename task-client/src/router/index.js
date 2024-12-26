@@ -5,9 +5,16 @@ import AuthPage from '@/pages/AuthPage.vue'
 import WeekPage from '@/pages/WeekPage.vue'
 import store from '@/store'
 import ProfilePage from '@/pages/ProfilePage.vue'
+import MainPage from '@/pages/MainPage.vue'
 
 
 const routes = [
+	{
+		path: '/',
+		name: 'main',
+		component: MainPage,
+		meta: { requiresAuth: false }
+	},
 	{
 		path: '/day/:weekIndex/:date',
 		name: 'day',
@@ -23,9 +30,10 @@ const routes = [
 		})
 	},
 	{
-		path: '/',
+		path: '/calendar',
 		name: 'calendar',
-		component: CalendarPage
+		component: CalendarPage,
+		meta: { requiresAuth: true }
 	},
 	{
 		path: '/auth',
@@ -47,11 +55,24 @@ const router = createRouter({
 // Добавляем глобальные хуки для анимации
 router.beforeEach((to, from, next) => {
 	store.dispatch('auth/tryLocalStorage')
-	const app = document.getElementById('app')
-	if (app) {
-		app.classList.add('page-transition-leave')
+  const app = document.getElementById('app')
+  if (app) {
+    app.classList.add('page-transition-leave')
+  }
+	const isAuth = !!localStorage.getItem('token')
+
+	if (to.meta.requiresAuth && !isAuth) {
+		// Если нужна авторизация, но пользователь не авторизован
+		return next({ name: 'auth' })
 	}
-	next()
+
+	if (to.path === '/' && isAuth) {
+		// Если пользователь авторизован и идёт на главную
+		return next({ name: 'calendar' })
+	}
+
+	// В остальных случаях
+	return next()
 })
 
 router.afterEach(() => {

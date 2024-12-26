@@ -79,6 +79,7 @@ export default {
 	display: flex;
 	flex-direction: column;
 	gap: 1vw;
+	width: 100%;
 	&-header {
 		display: flex;
 		justify-content: space-between;
@@ -98,9 +99,9 @@ export default {
 	}
 	&-component {
 		display: flex;
-		gap: 2vw;
+		gap: 1vw;
 		position: relative;
-		padding-bottom: 1vw;
+		justify-content: space-between;
 		&-day {
 			transition: transform 0.3s ease-in-out;
 		}

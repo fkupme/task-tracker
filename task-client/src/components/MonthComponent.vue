@@ -1,22 +1,22 @@
 <template>
 	<main>
 		<div class="month">
-			<div v-if="!month">Загрузка...</div>
-			<template v-else>
-				<navigation-panel
-					class="month-nav"
-					:date="formatDate(date)"
-					@prev="goToPrevMonth(date)"
-					@next="goToNextMonth(date)"
-				/>
-				<week-component
-					v-for="(week, index) in month"
-					:key="index"
-					class="month-line"
-					:week="week"
-					:weekIndex="Number(index)"
-				/>
-			</template>
+				<div v-if="!month">Загрузка...</div>
+				<template v-else>
+					<navigation-panel
+						class="month-nav"
+						:date="formatDate(date)"
+						@prev="goToPrevMonth(date)"
+						@next="goToNextMonth(date)"
+					/>
+					<week-component
+						v-for="(week, index) in month"
+						:key="index"
+						class="month-line"
+						:week="week"
+						:weekIndex="Number(index)"
+					/>
+				</template>
 		</div>
 	</main>
 </template>
@@ -99,17 +99,24 @@ export default {
 </script>
 
 <style lang="scss">
+.fade-enter-active, .fade-leave-active {
+	transition: opacity 0.5s ease;
+}
+.fade-enter-from, .fade-leave-to {
+	opacity: 0;
+}
 .month {
-	display: flex;
-	flex-direction: column;
-	flex-wrap: nowrap;
-	margin-top: auto;
-	gap: 2dvh;
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    margin-top: auto;
+    gap: 2dvh;
 	&-nav {
 		margin-bottom: 0;
 	}
 	&-line {
 		flex: 1 1 1;
+		width: 100%;
 	}
 }
 </style>
