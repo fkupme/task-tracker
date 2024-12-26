@@ -10,6 +10,7 @@
 			label="Название"
 			placeholder="Введите название задачи"
 			id="task"
+			@update:modelValue="handleNameChange"
 			:error="errors.task"
 		/>
 
@@ -63,13 +64,11 @@
 			id="comment"
 		/>
 
-		<my-field
-			v-if="form.repeat"
-			class="task-form__field"
-			v-model="form.exceptions"
-			label="Исключения"
-			placeholder="Введите исключения"
-			id="exceptions"
+		<excludes-creator
+		v-if="form.repeat"
+		id="exceptions-edit"
+		label="Исключения"
+		v-model="form.exceptions" 
 		/>
 
 		<button class="task-form__submit" type="submit" @submit="handleSubmit, clearForm">Создать</button>

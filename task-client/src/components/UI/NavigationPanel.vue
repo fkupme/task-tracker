@@ -7,6 +7,7 @@
 							alt="back"
 					/>
 			</button>
+			<h3 class="navigation-panel__title">{{ date }}</h3>
 			<button class="navigation-panel__button" @click="$emit('next')">
 					<img
 							class="navigation-panel__button-icon"
@@ -20,7 +21,13 @@
 <script>
 export default {
 	name: 'navigation-panel',
-	emits: ['prev', 'next']
+	emits: ['prev', 'next'],
+	props: {
+		date: {
+			type: String,
+			required: true
+		}
+	}
 }
 </script>
 
@@ -30,6 +37,13 @@ export default {
 	justify-content: space-between;
 	align-items: center;
 	margin-bottom: 1rem;
+	&__title {
+		font-size: 1.5rem;
+		font-weight: 600;
+		margin: 0;
+		text-align: center;
+		text-transform: capitalize;
+	}
 
 	&__button {
 			background: none;

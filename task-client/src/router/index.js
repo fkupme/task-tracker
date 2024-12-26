@@ -47,7 +47,6 @@ const router = createRouter({
 // Добавляем глобальные хуки для анимации
 router.beforeEach((to, from, next) => {
 	store.dispatch('auth/tryLocalStorage')
-	store.dispatch('events/getEventsFromCache')
 	const app = document.getElementById('app')
 	if (app) {
 		app.classList.add('page-transition-leave')

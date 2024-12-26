@@ -1,5 +1,8 @@
 const { Sequelize } = require('sequelize')
 const dotenv = require('dotenv')
+const { BaseEventModel } = require('./models/base-event.model')
+const { SingleEventModel } = require('./models/single-event.model')
+const { RecurringEventModel } = require('./models/recurring-event.model')
 
 dotenv.config()
 
@@ -10,9 +13,30 @@ const sequelize = new Sequelize({
 	username: process.env.POSTGRES_USER,
 	password: process.env.POSTGRES_PASSWORD,
 	database: process.env.POSTGRES_DB,
-	logging: console.log // для отладки SQL запросов
+	logging: console.log, // для отладки SQL запросов
 })
 
+// Инициализируем модели с созданным экземпляром sequelize
+const BaseEvent = BaseEventModel(sequelize);
+const SingleEvent = SingleEventModel(sequelize);
+const RecurringEvent = RecurringEventModel(sequelize);
+
+// Определяем связи
+BaseEvent.hasOne(SingleEvent, {
+    foreignKey: 'base_event_id',
+    as: 'single_event'
+});
+SingleEvent.belongsTo(BaseEvent, {
+    foreignKey: 'base_event_id'
+});
+
+BaseEvent.hasOne(RecurringEvent, {
+    foreignKey: 'base_event_id',
+    as: 'recurring_event'
+});
+RecurringEvent.belongsTo(BaseEvent, {
+    foreignKey: 'base_event_id'
+});
 // Проверка подключения
 async function testConnection() {
 	try {
@@ -29,4 +53,4 @@ async function testConnection() {
 
 testConnection()
 
-module.exports = { sequelize } 
+module.exports = { sequelize, BaseEvent, SingleEvent, RecurringEvent } 

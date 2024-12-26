@@ -1,13 +1,6 @@
 <template>
 	<form class="task-form" @submit.prevent="handleSubmit">
 		<h3 class="task-form__title">Редактировать задачу</h3>
-		<my-checkbox 
-		v-model="form.repeat" 
-		id="repeat-edit"
-		:checked="form.repeat"
-		>
-			Повторять
-		</my-checkbox>
 		<my-field
 			v-model="form.name"
 			label="Название"
@@ -34,19 +27,17 @@
 			/>
 		</div>
 
-		<template v-if="form.repeat">
+		<template v-if="repeat">
 			<dropdown-list
 				v-model="form.week_day"
 				label="День недели"
 				:items="weekDays"
 				id="week-day-edit"
 			/>
-
-			<my-field
-				v-model="form.exceptions"
-				label="Исключения"
-				type="date"
+			<excludes-creator
 				id="exceptions-edit"
+				label="Исключения"
+				v-model="form.exceptions"
 			/>
 		</template>
 		<template v-else>
@@ -62,7 +53,9 @@
 		/>
 
 		<div class="task-form__actions">
-			<button class="task-form__submit" type="submit" @click="handleSubmit">Сохранить</button>
+			<button class="task-form__submit" type="submit" @click="handleSubmit">
+				Сохранить
+			</button>
 			<button class="task-form__cancel" type="button" @click="$emit('close')">
 				Отмена
 			</button>
@@ -71,13 +64,20 @@
 </template>
 
 <script>
-import { mapActions } from 'vuex'
+import { mapActions } from "vuex";
 export default {
 	name: "task-edit-form",
 	props: {
 		task: {
 			type: Object,
 			required: true,
+		},
+		repeat: {
+			type: Boolean,
+			required: true,
+		},
+		date: {
+			type: String,
 		},
 	},
 	data() {
@@ -96,12 +96,12 @@ export default {
 				start: this.task.start,
 				end: this.task.end,
 				comment: this.task.comment,
-				repeat: Boolean(this.task.repeat),
+				repeat: this.repeat,
 				week_day: this.task.repeat
 					? this.getWeekDayNumber(this.task.repeat)
 					: null,
 				exceptions: this.task.exceptions || null,
-				date: !this.task.repeat ? this.task.date : null,
+				date: this.date,
 			},
 			errors: {
 				name: "",
@@ -123,11 +123,15 @@ export default {
 			};
 			return weekDays[day] || null;
 		},
-		...mapActions({ updateEvent: 'events/updateEvent' }),
+		...mapActions({ updateEvent: "events/updateEvent" }),
 		handleSubmit() {
 			this.updateEvent({ id: this.task.id, event: this.form });
-			this.$emit('close');
+			this.$emit("close");
 		},
+	},
+	mounted() {
+		console.log(this.task)
+		console.log(this.date)
 	},
 };
 </script>

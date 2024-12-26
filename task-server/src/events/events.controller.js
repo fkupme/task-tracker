@@ -5,6 +5,11 @@ const { JwtService } = require('@nestjs/jwt')
 const dotenv = require('dotenv')
 dotenv.config()
 
+function getUserId(req) {
+	const token = req.headers.authorization.split(' ')[1]
+	return new JwtService({ secret: process.env.JWT_SECRET }).verify(token).id
+}
+
 class EventsController {
 	constructor(eventsService) {
 		this.eventsService = eventsService
@@ -15,8 +20,7 @@ class EventsController {
 // Определяем методы и сразу применяем декораторы
 Object.defineProperty(EventsController.prototype, 'createEvent', {
 	value: async function (eventDto, req) {
-		console.log(eventDto)
-		return await this.eventsService.createEvent(eventDto, req.user.id)
+		return await this.eventsService.createEvent(eventDto, getUserId(req))
 	},
 	writable: true,
 	enumerable: true
@@ -28,9 +32,7 @@ Req()(EventsController.prototype, 'createEvent', 1)
 Object.defineProperty(EventsController.prototype, 'getMonthEvents', {
 	value: async function (date, req) {
 		try {
-			const token = req.headers.authorization.split(' ')[1]
-			const userId = this.jwtService.verify(token).id
-			return await this.eventsService.getMonthEvents(date, userId)
+			return await this.eventsService.getMonthEvents(date, getUserId(req))
 		} catch (error) {
 			console.error('Controller error:', error)
 			throw error
@@ -45,9 +47,7 @@ Req()(EventsController.prototype, 'getMonthEvents', 1)
 
 Object.defineProperty(EventsController.prototype, 'findEventsByName', {
 	value: async function (name, req) {
-		const token = req.headers.authorization.split(' ')[1]
-		const userId = this.jwtService.verify(token).id
-		return await this.eventsService.findEventsByName(name, userId)
+		return await this.eventsService.findEventsByName(name, getUserId(req))
 	},
 	writable: true,
 	enumerable: true
@@ -67,8 +67,8 @@ Get(':id')(EventsController.prototype, 'findEventById', Object.getOwnPropertyDes
 Param('id')(EventsController.prototype, 'findEventById', 0)
 
 Object.defineProperty(EventsController.prototype, 'updateEvent', {
-	value: async function (id, eventDto) {
-		return await this.eventsService.updateEvent(id, eventDto)
+	value: async function (id, eventDto, req) {
+		return await this.eventsService.updateEvent(id, eventDto, getUserId(req))
 	},
 	writable: true,
 	enumerable: true
@@ -76,10 +76,13 @@ Object.defineProperty(EventsController.prototype, 'updateEvent', {
 Put(':id')(EventsController.prototype, 'updateEvent', Object.getOwnPropertyDescriptor(EventsController.prototype, 'updateEvent'))
 Param('id')(EventsController.prototype, 'updateEvent', 0)
 Body()(EventsController.prototype, 'updateEvent', 1)
+Req()(EventsController.prototype, 'updateEvent', 2)
+
 
 Object.defineProperty(EventsController.prototype, 'deleteEvent', {
 	value: async function (id, req) {
-		return await this.eventsService.deleteEvent(id, req.user.id)
+
+		return await this.eventsService.deleteEvent(id, getUserId(req))
 	},
 	writable: true,
 	enumerable: true

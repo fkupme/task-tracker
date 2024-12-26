@@ -11,6 +11,7 @@ export const eventsModule = {
 	mutations: {
 		SET_EVENTS(state, events) {
 			state.events = events
+			localStorage.setItem('events', JSON.stringify(events))
 		},
 		SET_LOADING(state, loading) {
 			state.loading = loading
@@ -18,14 +19,16 @@ export const eventsModule = {
 		SET_ERROR(state, error) {
 			state.error = error
 		},
-		setSearchData(state, data) {
+		SET_SEARCH_DATA(state, data) {
 			state.searchData = data
-		}
+		},
+		SET_DATE(state, date) {
+			state.date = date
+			localStorage.setItem('date', JSON.stringify(date))
+		},
 	},
 	actions: {
-		async updateEvent({ state, dispatch, rootState }, { id, event }) {  // деструктурируем параметры
-			console.log('Updating event:', { id, event });
-			
+		async updateEvent({ state, dispatch, rootState }, { id, event }) {
 			let eventDto;
 			if (event.repeat) {
 					eventDto = {
@@ -49,11 +52,9 @@ export const eventsModule = {
 							comment: event.comment
 					};
 			}
-	
-			console.log('Event DTO:', eventDto);
 			
 			try {
-					const response = await fetch(`${state.PATH}/events/${id}`, {  // исправил URL
+					const response = await fetch(`${state.PATH}/events/${id}`, {
 							method: 'PUT',
 							headers: {
 									'Content-Type': 'application/json',
@@ -138,24 +139,27 @@ export const eventsModule = {
 					}
 				})
 				const data = await response.json()
-				commit('setSearchData', data)
+				commit('SET_SEARCH_DATA', data)
 			} catch (error) {
 				console.error('Error searching events:', error)
 			}
 		},
-		getEventsFromCache({ commit }, date) {
-			const cachedEvents = localStorage.getItem(`events_${date}`)
-			if (cachedEvents) {
-				commit('SET_EVENTS', JSON.parse(cachedEvents))
-				return true
+		getEventsFromCache({ commit }) {
+			const cachedEvents = JSON.parse(localStorage.getItem(`events`))
+			if (cachedEvents.length > 0) {
+				commit('SET_EVENTS', cachedEvents)
+			}
+			const cachedDate = JSON.parse(localStorage.getItem(`date`))
+			if (cachedDate) {
+				commit('SET_DATE', cachedDate)
 			}
 			return false
 		},
 
-		async fetchMonth({ commit, state, dispatch }, date) {
+		async fetchMonth({ commit, state, getters }, date) {
 			try {
 				commit('SET_LOADING', true)
-
+				commit('SET_DATE', date)
 				const response = await fetch(`${state.PATH}/events/month?date=${date}`, {
 					method: 'GET',
 					headers: {
@@ -169,14 +173,11 @@ export const eventsModule = {
 				}
 
 				const data = await response.json()
-				// Проверяем структуру данных
 				if (!data || !data.weeks || !Array.isArray(data.weeks)) {
 					throw new Error('Invalid data format received')
 				}
 
-				// Сохраняем весь объект с данными
 				commit('SET_EVENTS', data)
-				localStorage.setItem(`events_${date}`, JSON.stringify(data))
 			} catch (error) {
 				console.error('Error fetching events:', error)
 				commit('SET_ERROR', error.message)
@@ -189,6 +190,7 @@ export const eventsModule = {
 	getters: {
 		getEvents: state => state.events,
 		isLoading: state => state.loading,
+		getDate: state => state.date,
 		hasError: state => !!state.error,
 		getError: state => state.error,
 		month: (state) => {
@@ -224,8 +226,11 @@ export const eventsModule = {
 						const hasOverlap = currentEndMinutes > nextStartMinutes
 						return hasOverlap
 					})
-
-					return { ...day, overlap }
+					const month = { ...day, overlap }
+					if (month.length) {
+						localStorage.setItem(`month`, JSON.stringify(month))
+					}
+					return month
 				})
 			})
 		}

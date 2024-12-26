@@ -1,6 +1,5 @@
 <template>
 	<article class="day-wrapper">
-		<h3 class="day-title">{{ formatDate(date) }}</h3>
 		<div class="day">
 			<div
 				:style="{ 'grid-row': i }"
@@ -14,6 +13,7 @@
 				v-for="task in tasks"
 				:task="task"
 				:key="task.id"
+				:date="date"
 				:style="defineStyle(task)"
 				@click.stop="handleTaskClick(task)"
 			/>
@@ -69,13 +69,6 @@ export default {
 		},
 	},
 	methods: {
-		formatDate(stringDate) {
-			const dateObj = new Date(stringDate);
-			const days = ['Воскресенье', 'Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота'];
-			const months = ['января', 'февраля', 'марта', 'апреля', 'мая', 'июня', 'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря'];
-			return `${days[dateObj.getDay()]}, ${dateObj.getDate()} ${months[dateObj.getMonth()]}`;
-		},
-		
 		timeToMinutes(time) {
 			const [hours, minutes] = time.split(":").map(Number);
 			return hours * 60 + minutes;

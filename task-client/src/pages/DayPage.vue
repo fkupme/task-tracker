@@ -1,7 +1,7 @@
 <template>
 	<div class="container">
 		<div class="day-page">
-			<navigation-panel @prev="goToPrevDay" @next="goToNextDay" />
+			<navigation-panel @prev="goToPrevDay" @next="goToNextDay" :date="formatDate(date)" />
 			<day-component :tasks="dayEvents" :date="date" :weekIndex="weekIndex" />
 		</div>
 	</div>
@@ -35,6 +35,12 @@ export default {
 		},
 	},
 	methods: {
+		formatDate(stringDate) {
+			const dateObj = new Date(stringDate);
+			const days = ['Воскресенье', 'Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота'];
+			const months = ['января', 'февраля', 'марта', 'апреля', 'мая', 'июня', 'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря'];
+			return `${days[dateObj.getDay()]}, ${dateObj.getDate()} ${months[dateObj.getMonth()]}`;
+		},
 		updateWeekIndex(newDate) {
 			const weekIndex = this.month?.findIndex((week) =>
 				week.some((day) => day.date === newDate)

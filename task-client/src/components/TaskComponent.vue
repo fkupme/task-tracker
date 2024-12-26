@@ -1,6 +1,6 @@
 <template>
 	<article class="task">
-		<task-edit-form :task="task" v-if="showEditForm"
+		<task-edit-form :repeat="!!task.repeat" :date="date" :task="task" v-if="showEditForm"
 		@close="closeEditForm"
 		 class="task-edit-form" v-click-outside="closeEditForm"/>
 		<h3 class="task__name">{{ task.task }}</h3>
@@ -69,6 +69,7 @@ export default {
 	},
 	props: {
 		task: Object,
+		date: String,
 	},
 	methods: {
 		toggle(model) {
@@ -92,6 +93,9 @@ export default {
 	directives: {
 		clickOutside,
 	},
+	mounted() {
+		console.log(this.task)
+	}
 };
 </script>
 
