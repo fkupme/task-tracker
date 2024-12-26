@@ -1,11 +1,13 @@
 import { jwtDecode } from 'jwt-decode'
 
+const API_URL = import.meta.env.VITE_API_URL
+
 export const authModule = {
 	state: {
 		token: localStorage.getItem('token') || null,
 		user: null,
 		isAuth: false,
-		PATH: 'http://localhost:3002'
+		PATH: API_URL
 	},
 	mutations: {
 		setToken(state, token) {
@@ -30,7 +32,7 @@ export const authModule = {
 		},
 		async fetchRegister({ state, commit }, user) {
 			try {
-				const response = await fetch(`${state.PATH}/auth/register`, {
+				const response = await fetch(`${API_URL}/auth/register`, {
 					method: 'POST',
 					headers: {
 						'Content-Type': 'application/json'
@@ -65,7 +67,7 @@ export const authModule = {
 			}
 
 			try {
-				const response = await fetch(`${state.PATH}/auth/login`, {
+				const response = await fetch(`${API_URL}/auth/login`, {
 					method: 'POST',
 					headers: {
 						'Content-Type': 'application/json'

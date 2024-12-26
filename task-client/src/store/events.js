@@ -1,3 +1,5 @@
+const API_URL = import.meta.env.VITE_API_URL
+
 export const eventsModule = {
 	namespaced: true,
 	state: () => ({
@@ -5,7 +7,7 @@ export const eventsModule = {
 		loading: false,
 		error: null,
 		searchData: [],
-		PATH: `http://localhost:3002`,
+		PATH: API_URL,
 		date: new Date().toISOString().split('T')[0]
 	}),
 	mutations: {
@@ -44,7 +46,7 @@ export const eventsModule = {
 			} else {
 					eventDto = {
 							user_id: rootState.auth.user.id,
-							event_name: event.task,  // было name
+							event_name: event.task,
 							start_time: event.start,
 							end_time: event.end,
 							date: event.date,
@@ -54,7 +56,7 @@ export const eventsModule = {
 			}
 			
 			try {
-					const response = await fetch(`${state.PATH}/events/${id}`, {
+					const response = await fetch(`${API_URL}/events/${id}`, {
 							method: 'PUT',
 							headers: {
 									'Content-Type': 'application/json',
@@ -72,7 +74,7 @@ export const eventsModule = {
 		},
 		async deleteEvent({ state, dispatch, rootState }, id) {
 			try {
-				const response = await fetch(`${state.PATH}/events/${Number(id)}`, {
+				const response = await fetch(`${API_URL}/events/${Number(id)}`, {
 				method: 'DELETE',
 				headers: {
 					'Content-Type': 'application/json',
@@ -111,7 +113,7 @@ export const eventsModule = {
 			}
 
 			try {
-				const response = await fetch(`${state.PATH}/events/create`, {
+				const response = await fetch(`${API_URL}/events/create`, {
 					method: 'POST',
 					headers: {
 						'Content-Type': 'application/json',
@@ -131,7 +133,7 @@ export const eventsModule = {
 			try {
 				const encodedSearch = encodeURIComponent(searchValue)
 
-				const response = await fetch(`${state.PATH}/events/search?name=${encodedSearch}`, {
+				const response = await fetch(`${API_URL}/events/search?name=${encodedSearch}`, {
 					method: 'GET',
 					headers: {
 						'Content-Type': 'application/json',
@@ -160,7 +162,7 @@ export const eventsModule = {
 			try {
 				commit('SET_LOADING', true)
 				commit('SET_DATE', date)
-				const response = await fetch(`${state.PATH}/events/month?date=${date}`, {
+				const response = await fetch(`${API_URL}/events/month?date=${date}`, {
 					method: 'GET',
 					headers: {
 						'Authorization': `Bearer ${localStorage.getItem('token')}`,
