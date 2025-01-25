@@ -1,10 +1,10 @@
 <template>
 	<div id="app">
-		<my-header />
+		<my-header />	
 		<router-view />
-		<div class="footer">
+		<footer class="footer">
 			<p class="footer__text">с наилучшими <br> пожеланиями</p>
-		</div>
+		</footer>
 	</div>
 </template>
 

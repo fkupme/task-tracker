@@ -7,7 +7,7 @@ export const authModule = {
 		token: localStorage.getItem('token') || null,
 		user: null,
 		isAuth: false,
-		PATH: API_URL
+		PATH: API_URL,
 	},
 	mutations: {
 		setToken(state, token) {
@@ -21,7 +21,7 @@ export const authModule = {
 				state.user = null
 				state.isAuth = false
 			}
-		}
+		},
 	},
 	actions: {
 		tryLocalStorage({ commit }) {
@@ -47,6 +47,7 @@ export const authModule = {
 				})
 
 				if (!response.ok) {
+
 					throw new Error(await response.text())
 				}
 
@@ -78,15 +79,14 @@ export const authModule = {
 					})
 				})
 
-				if (!response.ok) {
-					throw new Error(await response.text())
-				}
-
+        if (!response.ok) {
+					const errorText = await response.text();
+					throw new Error(errorText);
+			}
 				const data = await response.json()
 				if (data.token) {
 					commit('setToken', data.token)
 				}
-				
 				return data
 			} catch (error) {
 				console.error('Login error:', error)

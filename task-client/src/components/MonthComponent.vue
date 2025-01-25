@@ -25,6 +25,7 @@
 import WeekComponent from "@/components/WeekComponent.vue";
 import { mapGetters, mapState } from "vuex";
 
+
 export default {
 	name: "month-component",
 	components: { WeekComponent },
